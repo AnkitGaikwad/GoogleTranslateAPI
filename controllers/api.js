@@ -1,4 +1,12 @@
 const fetch = require("node-fetch");
+const redis = require('redis');
+
+const client = redis.createClient({legacyMode: true});
+client.connect()
+    .then(() => {
+        console.log("Connnection established to redis");
+    })
+    .catch((err) => {console.log(err);});
 
 const translateText = (req, res) => {
 
@@ -24,6 +32,7 @@ const translateText = (req, res) => {
     .then((res) => res.json())
     .then((json) => {
         console.log( json.data.translations[0].translatedText );
+        client.set(req.query.q, json.data.translations[0].translatedText);
         res.status(200).json({
             "Original Text is: ": req.query.q,
             "Translation Language is: ": req.body.target,
